@@ -1,4 +1,7 @@
 # detr
+
+## 前期准备
+
  数学建模大作业：detr复现
 
 参照 official README 下载 COCO2017 数据集，配置环境。
@@ -7,6 +10,8 @@
 
 训练代码可以不做修改直接跑通，但考虑到一个 epoch （好像是7900轮次）都需要很长时间，我们放弃训练，而是使用作者预训练好的模型复现测试结果。
 A single epoch takes 28 minutes, so 300 epoch training takes around 6 days on a single machine with 8 V100 cards. To ease reproduction of our results we provide results and training logs for 150 epoch schedule (3 days on a single machine), achieving 39.5/60.3 AP/AP50.
+
+## 复现测试结果
 
 使用预训练模型进行测试数据复现。官方复现网页为 https://gist.github.com/szagoruyko/9c9ebb8455610958f7deaa27845d7918。
 
@@ -54,3 +59,11 @@ A single epoch takes 28 minutes, so 300 epoch training takes around 6 days on a 
   ```
 
 按照以上指令，能够复现。
+
+==后续需要单独写一个复现代码，而不是全盘套用原有的 main.py==
+
+## 局限性
+
+根据论文中的测试结果，DETR 在 small objects 层面不如同层次的 Faster R-CNN
+
+小目标检测（SOD）:[2020-2023年Transformer在小目标检测领域应用综述 - 知乎](https://zhuanlan.zhihu.com/p/656402058)
