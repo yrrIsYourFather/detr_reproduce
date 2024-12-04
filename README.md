@@ -36,8 +36,8 @@
    在主文件夹下建立数据集软链接。
 
    ```
-   ln -s data2/coco2017/ home/ruiran/detr/datasets/coco
-   ln -s data2/coco-panoptic home/ruiran/detr/datasets/coco-panoptic
+   ln -s data2/coco2017/ /home/ruiran/detr/datasets/coco
+   ln -s data2/coco-panoptic /home/ruiran/detr/datasets/coco-panoptic
    ```
 
 4. 作者开源的训练代码可以不做修改直接跑通。但考虑到训练时长和训练资源问题（8 张 V100 并行训练 300 轮次大约需要 6 天），我放弃训练，而是使用作者训练好的模型复现测试结果。
@@ -48,11 +48,17 @@
 
 ### 目标检测任务复现
 
-==阐释各个模型之间的区别==
+==阐释各个模型之间的区别，各个模型的训练是如何设置的？==
+
+==DC5模型是什么？可以修正翻译==
 
 #### 复现指令
 
 ==需要阐释指令中各个参数的意义，==
+
+能够成功复现，与我的唯一区别在于 `--dilation`。查看 Args 部分，该参数的作用是 "If true, we replace stride with dilation in the last convolutional block (DC5)"。
+
+复现用上面的 DETR 指令也不太行，会报错，官方指令如下，指定了`--backbone`，否则默认为 resnet50，某些架构不同。
 
 1. **[DETR-Resnet50](https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth)** 
 
@@ -60,56 +66,48 @@
    python reproduce.py --no_aux_loss --eval \
    	--batch_size 2 \
    	--resume https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth \
-       --coco_path home/ruiran/detr/datasets/coco
+       --coco_path /home/ruiran/detr/datasets/coco
    ```
 
 2. **[DETR-Resnet50-DC5](https://dl.fbaipublicfiles.com/detr/detr-r50-dc5-f0fb7ef5.pth)**
 
-   复现 DETR-DC5 模型时发现 AP 明显比报告的低20个点。然后发现README下面这段文字，将batch_size更新为1。好像效果还是不行。。。
-
    ```
-   python main.py --no_aux_loss --eval \
+   python reproduce.py --no_aux_loss --eval \
        --batch_size 1 --dilation \
        --resume https://dl.fbaipublicfiles.com/detr/detr-r50-dc5-f0fb7ef5.pth \
-       --coco_path home/ruiran/detr/datasets/coco
+       --coco_path /home/ruiran/detr/datasets/coco
    ```
 
-   在这一模型的复现过程中，我注意到 `batch_size` 的设置对于复现结果的显著影响。
-
-   We provide results for all DETR detection models in this gist. Note that numbers vary depending on batch size (number of images) per GPU. Non-DC5 models were trained with batch size 2, and DC5 with 1, so DC5 models show a significant drop in AP if evaluated with more than 1 image per GPU. 
-   关于batch_size问题的一些讨论：https://github.com/facebookresearch/detr/issues/217#issuecomment-684087741
-
-   
-
-   能够成功复现，与我的唯一区别在于 `--dilation`。查看 Args 部分，该参数的作用是 "If true, we replace stride with dilation in the last convolutional block (DC5)"。
-
-   ==注意batchsize问题，需要说明==
+   在这一模型的复现过程中，我注意到 `batch_size` 的设置对于复现结果的显著影响。`batch_size=2` 的结果在各项指标上均比 `batch_size=1` 下降了 6~7 个点，例如 `mAP` 由 43.2 降低至 36.0 。我将 DETR-Resnet50 测试阶段的 `batch_size` 同样调整至 1，测试结果却并没有出现类似的大幅波动。我对此感到疑惑，并在作者源代码仓库 [issue#217](https://github.com/facebookresearch/detr/issues/217#issuecomment-684087741) 中找到前人对这一问题的探讨，我了解到：这一问题与模型的训练 `batch_size` 设置紧密相关。DETR-Resnet-DC5 模型训练过程中设置 `batch_size=1`==为什么设为1？==，导致模型从未见过填充（padding），因此在测试集 `batch_size=2` 存在 padding 的情况下性能明显不足；而 DETR-Resnet50 模型训练过程中 `batch_size=4`，不存在这一问题，且模型对不同数量的 padding 具有较好的鲁棒性。
 
 3. **[DETR-Resnet101](https://dl.fbaipublicfiles.com/detr/detr-r101-2c7b67e5.pth)** 
 
-   的复现用上面的 DETR 指令也不太行，会报错，官方指令如下，指定了`--backbone`，否则默认为 resnet50，某些架构不同。
-
    ```
-   python main.py --no_aux_loss --eval \
+   python reproduce.py --no_aux_loss --eval \
        --backbone resnet101 \
        --batch_size 2 \
        --resume https://dl.fbaipublicfiles.com/detr/detr-r101-2c7b67e5.pth \
-       --coco_path home/ruiran/detr/datasets/coco
+       --coco_path /home/ruiran/detr/datasets/coco
    ```
 
 4. **[DETR-Resnet101-DC5](https://dl.fbaipublicfiles.com/detr/detr-r101-dc5-a2e86def.pth)**
 
    ```
-   python main.py --no_aux_loss --eval \
+   python reproduce.py --no_aux_loss --eval \
        --backbone resnet101 \
        --batch_size 1 --dilation \
        --resume https://dl.fbaipublicfiles.com/detr/detr-r101-dc5-a2e86def.pth \
-       --coco_path home/ruiran/detr/datasets/coco
+       --coco_path /home/ruiran/detr/datasets/coco
    ```
 
 #### 复现结果
 
-
+| 模型名             |  AP  | AP$_{50}$ | AP$_{75}$ | AP$_\text{S}$ | AP$_\text{M}$ | AP$_\text{L}$ |
+| :----------------- | :--: | :-------: | :-------: | :-----------: | :-----------: | :-----------: |
+| DETR               |      |           |           |               |               |               |
+| DETR-DC5           |      |           |           |               |               |               |
+| DETR-Resnet101     |      |           |           |               |               |               |
+| DETR-Resnet101-DC5 |      |           |           |               |               |               |
 
 ### 全景分割任务复现
 
