@@ -35,6 +35,7 @@
 
    ```
    ln -s /data2/coco2017 /home/ruiran/detr/coco
+   ln -s /data2/coco-panoptic /home/ruiran/detr/coco-panoptic
    ```
    
 4. 作者开源的训练代码可以不做修改直接跑通。但考虑到训练时长和训练资源问题（8 张 V100 并行训练 300 轮次大约需要 6 天），我放弃训练，而是使用作者训练好的模型复现测试结果。
@@ -45,7 +46,7 @@
 
 ### 目标检测任务复现
 
-作者共训练了四类 DETR 模型，分别命名为 DETR、DETR-DC5、DETR-R101、DETR-R101-DC5。前两者的 backbone 选用 resnet50，而后两者为 resnet101。“-DC5” 表示 backbone 的 C5 层被替换为一个空洞卷积，并将步长设置为1；这一操作主要用于提高特征分辨率，改善模型对小目标检测的能力。
+作者共训练了四类 DETR 模型，分别命名为 DETR、DETR-DC5、DETR-R101、DETR-R101-DC5。前两者的 backbone 选用 resnet50，而后两者为 resnet101。“-DC5” 表示 backbone 的 C5 层被替换为一个步长为 1 的空洞卷积；这一操作主要用于提高特征分辨率，改善模型对小目标检测的能力。
 
 #### 复现指令
 
@@ -120,7 +121,7 @@
        --resume https://dl.fbaipublicfiles.com/detr/detr-r50-panoptic-00ce5173.pth \
        --masks --dataset_file coco_panoptic \
        --coco_path /home/ruiran/detr/coco \
-       --coco_panoptic_path /home/ruiran/detr/coco
+       --coco_panoptic_path /home/ruiran/detr/coco-panoptic
    ```
 
 2. **[DETR-Resnet50-DC5](https://dl.fbaipublicfiles.com/detr/detr-r50-dc5-panoptic-da08f1b1.pth)**
@@ -132,7 +133,7 @@
        --resume https://dl.fbaipublicfiles.com/detr/detr-r50-dc5-panoptic-da08f1b1.pth \
        --masks --dataset_file coco_panoptic \
        --coco_path /home/ruiran/detr/coco \
-       --coco_panoptic_path /home/ruiran/detr/coco
+       --coco_panoptic_path /home/ruiran/detr/coco-panoptic
    ```
 
 3. **[DETR-Resnet101](https://dl.fbaipublicfiles.com/detr/detr-r101-panoptic-40021d53.pth)**
@@ -144,10 +145,8 @@
        --resume https://dl.fbaipublicfiles.com/detr/detr-r101-panoptic-40021d53.pth \
        --masks --dataset_file coco_panoptic \
        --coco_path /home/ruiran/detr/coco \
-       --coco_panoptic_path /home/ruiran/detr/coco
+       --coco_panoptic_path /home/ruiran/detr/coco-panoptic
    ```
-
-   
 
 #### 复现结果
 
