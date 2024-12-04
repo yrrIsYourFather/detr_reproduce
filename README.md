@@ -45,9 +45,7 @@
 
 ### 目标检测任务复现
 
-==阐释各个模型之间的区别，各个模型的训练是如何设置的？==
-
-==DC5模型是什么？可以修正翻译==
+作者共训练了四类 DETR 模型，分别命名为 DETR、DETR-DC5、DETR-R101、DETR-R101-DC5。前两者的 backbone 选用 resnet50，而后两者为 resnet101。“-DC5” 表示 backbone 的 C5 层被替换为一个空洞卷积，并将步长设置为1；这一操作主要用于提高特征分辨率，改善模型对小目标检测的能力。
 
 #### 复现指令
 
@@ -55,11 +53,11 @@
 
 - `--batch_size`：每张 GPU 卡上一次测试的图像数，默认为 2。
 - `--resume`：作者预训练模型的下载地址。
-- `--coco_path`：数据集路径。
-- `--dilation`："If true, we replace stride with dilation in the last convolutional block (DC5)"
+- `--coco_path`/`--coco_panoptic_path`：数据集路径。
+- `--dilation`：是否将 backbone C5 层替换为步长为 1 的空洞卷积。
 - `--backbone`：默认为 resnet50。
 
-1. **[DETR-Resnet50](https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth)** 
+1. **[DETR](https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth)** 
 
    ```
    python reproduce.py --no_aux_loss --eval \
@@ -68,7 +66,7 @@
        --coco_path /home/ruiran/detr/coco
    ```
 
-2. **[DETR-Resnet50-DC5](https://dl.fbaipublicfiles.com/detr/detr-r50-dc5-f0fb7ef5.pth)**
+2. **[DETR-DC5](https://dl.fbaipublicfiles.com/detr/detr-r50-dc5-f0fb7ef5.pth)**
 
    ```
    python reproduce.py --no_aux_loss --eval \
@@ -77,7 +75,9 @@
        --coco_path /home/ruiran/detr/coco
    ```
 
-   在这一模型的复现过程中，我注意到 `batch_size` 的设置对于复现结果的显著影响。`batch_size=2` 的结果在各项指标上均比 `batch_size=1` 下降了 6~7 个点，例如 `mAP` 由 43.2 降低至 36.0 。我将 DETR-Resnet50 测试阶段的 `batch_size` 同样调整至 1，测试结果却并没有出现类似的大幅波动。我对此感到疑惑，并在作者源代码仓库 [issue#217](https://github.com/facebookresearch/detr/issues/217#issuecomment-684087741) 中找到前人对这一问题的探讨，我了解到：这一问题与模型的训练 `batch_size` 设置紧密相关。DETR-Resnet-DC5 模型训练过程中设置 `batch_size=1`==为什么设为1？==，导致模型从未见过填充（padding），因此在测试集 `batch_size=2` 存在 padding 的情况下性能明显不足；而 DETR-Resnet50 模型训练过程中 `batch_size=4`，不存在这一问题，且模型对不同数量的 padding 具有较好的鲁棒性。
+   在这一模型的复现过程中，我注意到 `batch_size` 的设置对于复现结果的显著影响。`batch_size=2` 的结果在各项指标上均比 `batch_size=1` 下降了 6~7 个点，例如 `mAP` 由 43.2 降低至 36.0 。我将 DETR-Resnet50 测试阶段的 `batch_size` 同样调整至 1，测试结果却并没有出现类似的大幅波动。我对此感到疑惑，并在作者源代码仓库 [issue#217](https://github.com/facebookresearch/detr/issues/217#issuecomment-684087741) 中找到前人对这一问题的探讨，我了解到：这一问题与模型的训练 `batch_size` 设置紧密相关。DETR-Resnet-DC5 模型训练过程中设置 `batch_size=1`，导致模型从未见过填充（padding），因此在测试集 `batch_size=2` 存在 padding 的情况下性能明显不足；而 DETR-Resnet50 模型训练过程中 `batch_size=4`，不存在这一问题，且模型对不同数量的 padding 具有较好的鲁棒性。
+
+   需要说明的是，DC5 模型之所以在训练阶段将 `batch_size` 设置为 1，主要是受到 GPU 内存限制。空洞卷积通过在卷积核元素之间增加空间来扩大感受野，这通常会导致输出特征图的尺寸增加。这也相应地导致了分辨率更高的中间特征图需要在网络的前向和后向传播过程中被存储，从而增加了内存消耗。作者在 [issue#129](https://github.com/facebookresearch/detr/issues/129) 中解释到，即使是 `batch_size=1` 的 DC5 模型在训练时也需要超过 16GB 的显存，这使得训练阶段更大的 `batch_size` 暂时无法实现。
 
 3. **[DETR-Resnet101](https://dl.fbaipublicfiles.com/detr/detr-r101-2c7b67e5.pth)** 
 
@@ -162,3 +162,5 @@
 [Small object detection by DETR via information augmentation and adaptive feature fusion](https://x.sci-hub.org.cn/target?link=https://dl.acm.org/doi/abs/10.1145/3664524.3675362) 专门提到 DETR 在小目标检测上的改进方法
 
 DETR demonstrates significantly better performance on large objects, a result likely enabled by the non-local computations of the transformer
+
+==修改翻译：空洞卷积==
