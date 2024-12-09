@@ -84,7 +84,7 @@
 
    需要说明的是，DC5 模型之所以在训练阶段将 `batch_size` 设置为 1，主要是受到 GPU 内存限制。空洞卷积通过在卷积核元素之间增加空间来扩大感受野，这通常会导致输出特征图的尺寸增加。这也相应地导致了分辨率更高的中间特征图需要在网络的前向和后向传播过程中被存储，从而增加了内存消耗。作者在 [issue#129](https://github.com/facebookresearch/detr/issues/129) 中解释到，即使是 `batch_size=1` 的 DC5 模型在训练时也需要超过 16GB 的显存，这使得训练阶段更大的 `batch_size` 暂时无法实现。
 
-3. **[DETR-Resnet101](https://dl.fbaipublicfiles.com/detr/detr-r101-2c7b67e5.pth)** 
+3. **[DETR-R101](https://dl.fbaipublicfiles.com/detr/detr-r101-2c7b67e5.pth)** 
 
    ```
    python reproduce.py --no_aux_loss --eval \
@@ -94,7 +94,7 @@
        --coco_path /home/ruiran/detr/coco
    ```
 
-4. **[DETR-Resnet101-DC5](https://dl.fbaipublicfiles.com/detr/detr-r101-dc5-a2e86def.pth)**
+4. **[DETR-R101-DC5](https://dl.fbaipublicfiles.com/detr/detr-r101-dc5-a2e86def.pth)**
 
    ```
    python reproduce.py --no_aux_loss --eval \
@@ -106,18 +106,18 @@
 
 #### 复现结果
 
-| 模型名             |  AP  | AP<sub>50</sub> | AP<sub>75</sub> | AP<sub>S</sub> | AP<sub>M</sub> | AP<sub>L</sub> |
-| :----------------- | :--: | :-------------: | :-------------: | :------------: | :------------: | :------------: |
-| DETR               | 42.0 |      62.4       |      44.2       |      20.5      |      45.8      |      61.1      |
-| DETR-DC5           | 43.2 |      63.0       |      45.9       |      22.5      |      47.3      |      61.0      |
-| DETR-Resnet101     | 43.5 |      63.8       |      46.3       |      21.8      |      47.9      |      61.8      |
-| DETR-Resnet101-DC5 | 44.9 |      64.7       |      47.7       |      23.7      |      49.5      |      62.3      |
+| 模型名        |  AP  | AP<sub>50</sub> | AP<sub>75</sub> | AP<sub>S</sub> | AP<sub>M</sub> | AP<sub>L</sub> |
+| :------------ | :--: | :-------------: | :-------------: | :------------: | :------------: | :------------: |
+| DETR          | 42.0 |      62.4       |      44.2       |      20.5      |      45.8      |      61.1      |
+| DETR-DC5      | 43.2 |      63.0       |      45.9       |      22.5      |      47.3      |      61.0      |
+| DETR-R101     | 43.5 |      63.8       |      46.3       |      21.8      |      47.9      |      61.8      |
+| DETR-R101-DC5 | 44.9 |      64.7       |      47.7       |      23.7      |      49.5      |      62.3      |
 
 ### 全景分割任务复现
 
 #### 复现指令
 
-1. **[DETR-Resnet50](https://dl.fbaipublicfiles.com/detr/detr-r50-panoptic-00ce5173.pth)**
+1. **[DETR](https://dl.fbaipublicfiles.com/detr/detr-r50-panoptic-00ce5173.pth)**
 
    ```
    python reproduce.py --no_aux_loss --eval \
@@ -128,7 +128,7 @@
        --coco_panoptic_path /home/ruiran/detr/coco-panoptic
    ```
 
-2. **[DETR-Resnet50-DC5](https://dl.fbaipublicfiles.com/detr/detr-r50-dc5-panoptic-da08f1b1.pth)**
+2. **[DETR-DC5](https://dl.fbaipublicfiles.com/detr/detr-r50-dc5-panoptic-da08f1b1.pth)**
 
    ```
    python reproduce.py --no_aux_loss --eval \
@@ -140,7 +140,7 @@
        --coco_panoptic_path /home/ruiran/detr/coco-panoptic
    ```
 
-3. **[DETR-Resnet101](https://dl.fbaipublicfiles.com/detr/detr-r101-panoptic-40021d53.pth)**
+3. **[DETR-R101](https://dl.fbaipublicfiles.com/detr/detr-r101-panoptic-40021d53.pth)**
 
    ```
    python reproduce.py --no_aux_loss --eval \
@@ -161,13 +161,3 @@
 | DETR-R101 | 45.1 | 79.9 | 55.5 |      50.6       |      80.9       |      61.7       |      37.0       |      78.5       |      46.0       | 33.0 |
 
 无论是 DETR 用于目标检测还是全景分割，**<u>复现结果与原文结果误差均不超过 0.2 个百分点，复现效果较为理想</u>**。
-
-## 局限性
-
-根据论文中的测试结果，DETR 在 small objects 层面不如同层次的 Faster R-CNN
-
-小目标检测（SOD）:[2020-2023年Transformer在小目标检测领域应用综述 - 知乎](https://zhuanlan.zhihu.com/p/656402058)
-
-[Small object detection by DETR via information augmentation and adaptive feature fusion](https://x.sci-hub.org.cn/target?link=https://dl.acm.org/doi/abs/10.1145/3664524.3675362) 专门提到 DETR 在小目标检测上的改进方法
-
-DETR demonstrates significantly better performance on large objects, a result likely enabled by the non-local computations of the transformer
