@@ -2,12 +2,13 @@
 
 ## 仓库简介
 
-这是我本学期（2024秋）数学建模大作业代码仓库，主要复现了 DETR (End-to-End Object Detection with Transformers, ECCV 2020) 这一目标检测领域代表工作。该工作截至目前已有超过 15000 次引用，影响力极大。
+这是我本学期（2024秋）数学建模大作业代码仓库，主要复现了 DETR (End-to-End Object Detection with Transformers, ECCV 2020) 这一目标检测领域代表工作。截至目前，该工作已有超过 15000 次引用，影响力极大。
 
 仓库代码基本由 [原仓库](https://github.com/facebookresearch/detr) fork 得到，我做了如下增改：
-1. 将原始 README 文档替换为现在的 README，主要阐述复现准备及复现结果。
+1. 将原始 README 文档替换为现在的 README，主要阐述复现步骤及复现结果。
 2. 整合了一份复现代码 [reproduce.py](/reproduce.py)，可以按照下面的操作指令进行复现。
-3. 对源代码核心部分的注释，主要为 [./model](/models) 文件夹下的模型架构代码。
+3. 对源代码核心部分的注释，主要为 [./model](/models) 文件夹下的模型架构代码，包括对源代码的理解。
+4. 复现结果 [可视化](/visualization.jpg)，展示了模型在目标检测和全景分割任务上的效果。可视化的代码与作者的 notebook 基本一致，详情参考 [DETR's hands on Colab Notebook](https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_attention.ipynb) 和 [Panoptic Colab Notebook](https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/DETR_panoptic.ipynb)。
 
 ## 前期准备
 
@@ -33,11 +34,11 @@
    ```
    data2
    - coco2017
-       - annotations/  				# annotation json files
-       - train2017/    				# train images
-       - val2017/      				# val images
+       - annotations/  				   # annotation json files
+       - train2017/    				   # train images
+       - val2017/      				   # val images
    - coco-panoptic
-   	- annotations/					# annotation json files
+   	- annotations/					   # annotation json files
        - panoptic_train2017/    		# train panoptic images
        - panoptic_val2017/      		# val panoptic images
    ```
@@ -170,3 +171,7 @@
 | DETR-R101 | 45.1 | 79.9 | 55.5 |      50.6       |      80.9       |      61.7       |      37.0       |      78.5       |      46.0       | 33.0 |
 
 无论是 DETR 用于目标检测还是全景分割，**<u>复现结果与原文结果误差均不超过 0.2 个百分点，复现效果较为理想，也表明模型在 COCO 系列数据集上确实具有较好的性能。</u>**
+
+除了模型的量化指标复现，我对模型实际效果进行了可视化，如下图所示。其中，前两行为模型在目标检测任务上的效果图，最后一行为全景分割任务。
+
+![](visualization.jpg)
