@@ -38,7 +38,7 @@
        - train2017/    				   # train images
        - val2017/      				   # val images
    - coco-panoptic
-   	- annotations/					# annotation json files
+   	 - annotations/					# annotation json files
        - panoptic_train2017/    		# train panoptic images
        - panoptic_val2017/      		# val panoptic images
    ```
